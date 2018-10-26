@@ -15,6 +15,9 @@ class GoogleAlbum:
     def __str__(self):
         return 'Album "{}": {}'.format(self.title, self.url)
 
+    def set_title(self, title):
+        self.title = title
+
     def from_dict(self, dictionary):
         """
         Sets GoogleAlbum object attributes to values given in dictionary

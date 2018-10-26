@@ -50,7 +50,9 @@ class GoogleMediaItem:
 
     def download_to_dir(self, directory):
         """
-        Downloads media item to given directory.
+        Downloads media item to given directory (with metadata, except GPS).
+        Info about download URL:
+        https://developers.google.com/photos/library/guides/access-media-items#image-base-urls
 
         :param directory: destination directory for downloaded item
         :return: filename, full path to saved media item
