@@ -18,6 +18,7 @@ from googleapiclient.discovery import build
 # local imports
 from authorization import Authorization
 from googlealbum import GoogleAlbum
+from googlemediaitem import GoogleMediaItem
 
 
 # Name of a file that contains the OAuth 2.0 information for this application:
@@ -54,6 +55,20 @@ def test():
     fields = 'nextPageToken,albums(id,title,mediaItemsCount,productUrl)'
     albums = service.albums().list(pageSize=2, fields=fields).execute()
     pprint(albums)
+
+    album = GoogleAlbum()
+    album.from_dict(albums['albums'][1])
+
+    # Body and fields for service call
+    body = {'pageSize': 25, 'albumId': album.id, 'pageToken': None, }
+    fields = 'nextPageToken,mediaItems(filename,mediaMetadata,baseUrl)'
+    items = service.mediaItems().search(body=body, fields=fields)
+    items = items.execute()
+    media_items = items['mediaItems']
+
+    media = GoogleMediaItem()
+    media.from_dict(media_items[1])
+    print(media.name)
 
 
 if __name__ == '__main__':
