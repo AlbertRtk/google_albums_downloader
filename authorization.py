@@ -24,11 +24,11 @@ class Authorization:
     # Return credentials
     def get_credentials(self):
         # Setting directory and JSON file with user's credentials
-        cwd_dir = os.getcwd()
-        creds_dir = os.path.join(cwd_dir, 'credentials')
-        if not os.path.exists(creds_dir):
-            os.makedirs(creds_dir)
-        creds_file = os.path.join(creds_dir, 'user_credentials.json')
+        cwd = os.getcwd()
+        user_dir = os.path.join(cwd, 'user')
+        if not os.path.exists(user_dir):
+            os.makedirs(user_dir)
+        creds_file = os.path.join(user_dir, 'credentials.json')
 
         # Getting credentials from Storage
         store = file.Storage(creds_file)

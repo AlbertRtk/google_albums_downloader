@@ -1,39 +1,50 @@
 import os.path
+import json
 
-from googlealbum import GoogleAlbum
 
-
+# TODO: commenting
 class LocalLibrary:
     def __init__(self, app_name):
         self.path = os.path.join(os.path.expanduser('~'), app_name)
-        self.downloaded_albums = set()
+        self.album_ids = set()
 
     def __str__(self):
-        return 'App settings:\n- library path: {}\n- downloaded albums: {}'\
-            .format(self.path, len(self.downloaded_albums))
+        return 'Local library:\n' \
+               '- library directory: {}\n' \
+               '- downloaded albums: {}'\
+               .format(self.path, len(self.album_ids))
 
-    def add(self, google_album):
-        if not isinstance(google_album, GoogleAlbum):
-            raise TypeError('append() takes GoogleAlbum instance as argument')
-        self.downloaded_albums.add(google_album)
+    def add(self, album_id):
+        if not isinstance(album_id, str):
+            raise TypeError('add() takes \str\' object as argument')
+        self.album_ids.add(album_id)
 
     def get_ids(self):
-        ids = set()
-        for album in self.downloaded_albums:
-            ids.add(album.id)
-        return ids
+        return self.album_ids
 
     def get_path(self):
         return self.path
 
-    def load(self, file):
+    # TODO
+    def load(self):
         pass
 
-    def store(self, file):
-        pass
+    def store(self):
+        cwd = os.getcwd()
+        user_dir = os.path.join(cwd, 'user')
+        if not os.path.exists(user_dir):
+            os.makedirs(user_dir)
+
+        ids = [i for i in self.album_ids]
+        library = {'path': self.path, 'album_ids': ids}
+
+        with open(os.path.join(user_dir, 'local_library.json'), 'w') as f:
+            json.dump(library, f)
 
     def set_path(self, path):
         assert os.path.isabs(path), 'Argument path has to be absolute path'
-        if not os.path.exists(path):
-            os.makedirs(path)
-        self.path = path
+        if path != self.path:
+            if not os.path.exists(path):
+                os.makedirs(path)
+            self.path = path
+        return self.path

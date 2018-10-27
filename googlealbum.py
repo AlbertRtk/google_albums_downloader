@@ -11,10 +11,9 @@ class GoogleAlbum:
         self.title = title
         self.items_count = items_count
         self.url = url
-        # self.downloaded_items = None
 
     def __str__(self):
-        return 'Album "{}": {}'.format(self.title, self.url)
+        return 'Google Photos Album "{}":\n{}'.format(self.title, self.url)
 
     def set_title(self, title):
         self.title = title

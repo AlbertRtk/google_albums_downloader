@@ -13,7 +13,6 @@ https://developers.google.com/photos/library/guides/overview
 import os
 from pprint import pprint
 import re
-import json
 
 # imports from google-api-python-client library
 from googleapiclient.discovery import build
@@ -61,25 +60,24 @@ def main():
     pattern = re.compile('^#\s*')
 
     google_album = GoogleAlbum()
-    downloaded_albums = []
 
     for album in albums:
         google_album.from_dict(album)
 
         # If title starts with # - changing title and downloading
         if bool(re.match(pattern, google_album.title)):
-            print(google_album)
-            downloaded_albums.append(google_album.to_dict())
-            google_album.set_title(pattern.split(google_album.title)[1])
+            print(google_album, end='\n'*2)
+            library.add(google_album.id)
+            google_album.set_title(re.sub(pattern, '', google_album.title))
             google_album.download(service, directory=LIBRARY_PATH,
                                   media_fields='(filename,baseUrl)')
 
-    # Saving downloaded albums info to JSON file
-    with open(os.path.join(LIBRARY_PATH, 'downloaded_albums.json'), 'w') as f:
-        json.dump(downloaded_albums, f)
+    library.store()
+    print('\nUpdated {}'.format(library))
     # ctypes.windll.kernel32.SetFileAttributesW(file, 2)  # hidden
 
 
+# TODO: move to googlealbum.py
 def get_albums(page_token=None, album_fields=''):
     """
     Function gets list of all albums (dict) from user photo library.
@@ -113,13 +111,13 @@ def test():
     album = GoogleAlbum()
     library.add(album)
     library.add(album)
+    library.set_path('C:\\Users\\Albert\\Albums downloader')
 
     print(library.get_ids())
-
 
     print(library)
 
 
 if __name__ == '__main__':
-    test()
-    # main()
+    # test()
+    main()
