@@ -36,50 +36,48 @@ class GoogleAlbum:
         self.items_count = int(dictionary['mediaItemsCount'])
         self.url = dictionary['productUrl']
 
-    def download(self, service, directory='.'):
+    def download(self, service, page_token=None, media_fields='',
+                  directory=os.path.expanduser('~'), counter=0):
         """
         Method downloads whole album from Google Photos to directory.
         Calls method GoogleMediaItem.download_to_dir() to download each media
-        item in the album.
+        item in the album. Recursion as long as in response is next page token.
 
         :param service: googleapiclient flow object
-        :param directory: destination directory for downloaded album
+        :param page_token: string - next page token, for 1st call None
+        :param media_fields: string - listing keys in dict describing
+        mediaItems, starts and ends with brackets (), comma-separated, no
+        whitespace characters, eg. '(filename,mediaMetadata,baseUrl)', default
+        empty string gets all possible fields
+        :param directory: destination directory for downloaded album, by default
+        user home directory (on Windows C:\\Users\\User)
+        :param counter: int - just a simple counter to count downloaded media
         :return: None
         """
 
-        # Setting page size (items/page) and counter of downloads
-        page_size = 25
-        counter = 0
-
-        # Setting and creating destination directory
+        # Setting destination directory for media files - named as album
         album_dir = os.path.join(directory, self.title)
         if not os.path.exists(album_dir):
             os.makedirs(album_dir)
 
-        # Body and fields for service call
-        body = {'pageSize': page_size, 'albumId': self.id, 'pageToken': None, }
-        fields = 'nextPageToken,mediaItems(filename,mediaMetadata,baseUrl)'
+        # Setting body, fields and request
+        body = {'albumId': self.id, 'pageToken': page_token, }
+        fields = 'nextPageToken,mediaItems{}'.format(media_fields)
+        request = service.mediaItems().search(body=body, fields=fields)
+        response = request.execute()
 
-        # Repeat until counts of downloads lower than items in the album
-        while counter < self.items_count:
-            # Getting next page with list of media in album
-            items = service.mediaItems().search(body=body, fields=fields)
-            items = items.execute()
-            media_items = items['mediaItems']
+        # Getting media items list from response
+        items = response['mediaItems'] if 'mediaItems' in response else []
 
-            media = GoogleMediaItem()
-            # Downloading all media from the page
-            for item in media_items:
-                counter += 1
-                media.from_dict(item)
-                name = media.download(album_dir)
-                print('({}/{}) downloaded: {}'.
-                      format(counter, self.items_count, name))
+        media = GoogleMediaItem()
+        # Downloading all media from the page
+        for item in items:
+            counter += 1
+            media.from_dict(item)
+            name = media.download(album_dir)
+            print('({}/{}) Downloaded: {}'.
+                  format(counter, self.items_count, name))
 
-            # Setting new page token in body, for next execution
-            # Handling exception - if key 'nextPageToken' doesn't exist, return
-            # Last page doesn't have nextPagToken
-            try:
-                body['pageToken'] = items['nextPageToken']
-            except KeyError:
-                return None
+        if 'nextPageToken' in response:
+            self.download(service, response['nextPageToken'], media_fields,
+                          directory, counter)

@@ -46,11 +46,7 @@ service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 def main():
     # Getting albums
-    page_size = 10  # max 20
-    fields = 'nextPageToken,albums(id,title,mediaItemsCount,productUrl)'
-    albums = service.albums().search(pageSize=10, fields=fields).execute()
-    albums = albums['albums']
-
+    albums = get_albums(album_fields='(id,title,mediaItemsCount,productUrl)')
     g_album = GoogleAlbum()
 
     # Titles of albums to download start with #
@@ -63,38 +59,41 @@ def main():
         if bool(re.match(pattern, g_album.title)):
             print(g_album)
             g_album.set_title(pattern.split(g_album.title)[1])
-            g_album.download(service, directory=LIBRARY_PATH)
+            g_album.download(service, directory=LIBRARY_PATH,
+                             media_fields='(filename,mediaMetadata,baseUrl)')
 
 
-def get_albums(page_token=None):
+def get_albums(page_token=None, album_fields=''):
     """
+    Function gets list of all albums from user photo library.
+    Recursion as long as in response is next page token.
 
-    :param page_token:
+    :param album_fields: string - listing keys in dict describing albums,
+    starts and ends with brackets (), comma-separated, no whitespace characters,
+    eg. '(id,title,mediaItemsCount,productUrl)', default empty string gets all
+    possible fields
+    :param page_token: string - next page token, for 1st call None
     :return:
     """
-    fields = 'nextPageToken,albums'
+
+    # Setting fields and request
+    fields = 'nextPageToken,albums{}'.format(album_fields)
     request = service.albums().list(pageToken=page_token, fields=fields)
     response = request.execute()
 
-    try:
-        albums = response['albums']
-    except KeyError:
-        return {}
+    # Getting albums list from response - if exists, else albums is empty list
+    albums = response['albums'] if 'albums' in response else []
 
+    # If in response is 'nextPageToken' - recursion and merging return to albums
     if 'nextPageToken' in response:
-        next_page_token = response['nextPageToken']
-        next_page = get_albums(page_token=next_page_token)
-        albums.append(next_page)
+        albums += get_albums(response['nextPageToken'], album_fields)
 
     return albums
 
 
 def test():
-    albums = get_albums()
+    albums = get_albums(album_fields='(id,title,mediaItemsCount,productUrl)')
     pprint(albums[1])
-
-    for k in ['id', 'title', 'mediaItemsCount', 'productUrl']:
-        print(albums[1][k])
 
     album = GoogleAlbum()
     album.from_dict(albums[1])
@@ -102,5 +101,5 @@ def test():
 
 
 if __name__ == '__main__':
-    test()
-    # main()
+    # test()
+    main()
