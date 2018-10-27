@@ -19,9 +19,12 @@ import json
 from googleapiclient.discovery import build
 
 # local imports
+from locallibrary import LocalLibrary
 from authorization import Authorization
 from googlealbum import GoogleAlbum
 
+
+APP_NAME = 'Albums downloader'
 
 # Name of a file that contains the OAuth 2.0 information for this application:
 CLIENT_SECRETS_FILE = "client_secret.json"
@@ -31,8 +34,12 @@ SCOPES = ['https://www.googleapis.com/auth/photoslibrary.readonly']
 API_SERVICE_NAME = 'photoslibrary'
 API_VERSION = 'v1'
 
-APP_NAME = 'Get Photos'
+
 LIBRARY_PATH = os.path.join(os.path.expanduser('~'), APP_NAME)
+DOWNLOADED_ALBUMS = 'downloaded_albums.json'
+
+# Settings
+library = LocalLibrary(APP_NAME)
 
 # Getting authorization
 authorization = Authorization(APP_NAME, SCOPES, CLIENT_SECRETS_FILE)
@@ -67,8 +74,10 @@ def main():
             google_album.download(service, directory=LIBRARY_PATH,
                                   media_fields='(filename,baseUrl)')
 
+    # Saving downloaded albums info to JSON file
     with open(os.path.join(LIBRARY_PATH, 'downloaded_albums.json'), 'w') as f:
         json.dump(downloaded_albums, f)
+    # ctypes.windll.kernel32.SetFileAttributesW(file, 2)  # hidden
 
 
 def get_albums(page_token=None, album_fields=''):
@@ -100,13 +109,17 @@ def get_albums(page_token=None, album_fields=''):
 
 
 def test():
-    albums = get_albums(album_fields='(id,title,mediaItemsCount,productUrl)')
-    pprint(albums[1])
-
+    print(library)
     album = GoogleAlbum()
-    album.from_dict(albums[1])
+    library.add(album)
+    library.add(album)
+
+    print(library.get_ids())
+
+
+    print(library)
 
 
 if __name__ == '__main__':
-    # test()
-    main()
+    test()
+    # main()
