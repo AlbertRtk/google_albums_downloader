@@ -4,21 +4,13 @@ from urllib.request import urlretrieve
 
 
 class GoogleMediaItem:
-    def __init__(self, name=None, type=None, base_url=None,
-                 width=None, height=None, creation_time=None, metadata=None):
+    def __init__(self, name=None, base_url=None):
         self.name = name
-        self.type = type
         self.base_url = base_url
-        self.width = width
-        self.height = height
-        self.creation_time = creation_time
-        self.metadata = metadata
 
     def __str__(self):
-        return 'Media item {}: {}=w{}-h{}'.\
-            format(self.name, self.base_url, self.width, self.height)
+        return 'Media item {}: {}=w{}-h{}'.format(self.name, self.base_url)
 
-    #
     def from_dict(self, dictionary):
         """
         Sets GoogleMediaItem object attributes to values given in dictionary
@@ -29,24 +21,13 @@ class GoogleMediaItem:
         :return: None
         """
 
-        required_keys = ['filename', 'mediaMetadata', 'baseUrl']
+        required_keys = ['filename', 'baseUrl']
         assert all(key in list(dictionary.keys()) for key in required_keys), \
-            'Dictionary missing required key. GoogleMediItem.from_dict() ' \
+            'Dictionary missing required key. GoogleMediaItem.from_dict() ' \
             'requires keys: {}'.format(required_keys)
 
         self.name = dictionary['filename']
-        self.width = dictionary['mediaMetadata']['width']
-        self.height = dictionary['mediaMetadata']['height']
-        base_url = dictionary['baseUrl']
-        self.base_url = base_url
-        self.creation_time = dictionary['mediaMetadata']['creationTime']
-
-        if 'photo' in dictionary['mediaMetadata']:
-            self.type = 'photo'
-        else:  # 'video' in inner_dict['mediaMetadata']:
-            self.type = 'video'
-
-        self.metadata = dictionary['mediaMetadata'][self.type]
+        self.base_url = dictionary['baseUrl']
 
     def download(self, directory):
         """

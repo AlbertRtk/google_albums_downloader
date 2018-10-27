@@ -11,6 +11,7 @@ class GoogleAlbum:
         self.title = title
         self.items_count = items_count
         self.url = url
+        # self.downloaded_items = None
 
     def __str__(self):
         return 'Album "{}": {}'.format(self.title, self.url)
@@ -36,21 +37,24 @@ class GoogleAlbum:
         self.items_count = int(dictionary['mediaItemsCount'])
         self.url = dictionary['productUrl']
 
-    def download(self, service, page_token=None, media_fields='',
-                  directory=os.path.expanduser('~'), counter=0):
+    def to_dict(self):
+        return {'id': self.id, 'title': self.title,
+                'mediaItemsCount': self.items_count, 'productUrl': self.url}
+
+    def download(self, service, directory, page_token=None, media_fields='',
+                 counter=0):
         """
         Method downloads whole album from Google Photos to directory.
         Calls method GoogleMediaItem.download_to_dir() to download each media
         item in the album. Recursion as long as in response is next page token.
 
         :param service: googleapiclient flow object
+        :param directory: destination directory for downloaded album
         :param page_token: string - next page token, for 1st call None
         :param media_fields: string - listing keys in dict describing
         mediaItems, starts and ends with brackets (), comma-separated, no
         whitespace characters, eg. '(filename,mediaMetadata,baseUrl)', default
         empty string gets all possible fields
-        :param directory: destination directory for downloaded album, by default
-        user home directory (on Windows C:\\Users\\User)
         :param counter: int - just a simple counter to count downloaded media
         :return: None
         """
@@ -79,5 +83,5 @@ class GoogleAlbum:
                   format(counter, self.items_count, name))
 
         if 'nextPageToken' in response:
-            self.download(service, response['nextPageToken'], media_fields,
-                          directory, counter)
+            self.download(service, directory, response['nextPageToken'],
+                          media_fields, counter)

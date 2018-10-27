@@ -10,8 +10,10 @@ https://developers.google.com/photos/library/guides/overview
 """
 
 # general imports
+import os
 from pprint import pprint
 import re
+import json
 
 # imports from google-api-python-client library
 from googleapiclient.discovery import build
@@ -30,7 +32,7 @@ API_SERVICE_NAME = 'photoslibrary'
 API_VERSION = 'v1'
 
 APP_NAME = 'Get Photos'
-LIBRARY_PATH = 'F:\\'
+LIBRARY_PATH = os.path.join(os.path.expanduser('~'), APP_NAME)
 
 # Getting authorization
 authorization = Authorization(APP_NAME, SCOPES, CLIENT_SECRETS_FILE)
@@ -39,7 +41,7 @@ credentials = authorization.get_credentials()
 service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 
-# TODO: storing album ids with list of downloaded photos
+# DONE: storing album ids TODO: with list of downloaded photos
 # TODO: refreshing album if its items changed
 # TODO: option for refreshing downloaded photo
 # TODO: user interface - console
@@ -47,25 +49,31 @@ service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 def main():
     # Getting albums
     albums = get_albums(album_fields='(id,title,mediaItemsCount,productUrl)')
-    g_album = GoogleAlbum()
 
     # Titles of albums to download start with #
     pattern = re.compile('^#\s*')
 
+    google_album = GoogleAlbum()
+    downloaded_albums = []
+
     for album in albums:
-        g_album.from_dict(album)
+        google_album.from_dict(album)
 
         # If title starts with # - changing title and downloading
-        if bool(re.match(pattern, g_album.title)):
-            print(g_album)
-            g_album.set_title(pattern.split(g_album.title)[1])
-            g_album.download(service, directory=LIBRARY_PATH,
-                             media_fields='(filename,mediaMetadata,baseUrl)')
+        if bool(re.match(pattern, google_album.title)):
+            print(google_album)
+            downloaded_albums.append(google_album.to_dict())
+            google_album.set_title(pattern.split(google_album.title)[1])
+            google_album.download(service, directory=LIBRARY_PATH,
+                                  media_fields='(filename,baseUrl)')
+
+    with open(os.path.join(LIBRARY_PATH, 'downloaded_albums.json'), 'w') as f:
+        json.dump(downloaded_albums, f)
 
 
 def get_albums(page_token=None, album_fields=''):
     """
-    Function gets list of all albums from user photo library.
+    Function gets list of all albums (dict) from user photo library.
     Recursion as long as in response is next page token.
 
     :param album_fields: string - listing keys in dict describing albums,
@@ -97,7 +105,6 @@ def test():
 
     album = GoogleAlbum()
     album.from_dict(albums[1])
-    print(album)
 
 
 if __name__ == '__main__':
