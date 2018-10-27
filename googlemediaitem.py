@@ -30,7 +30,7 @@ class GoogleMediaItem:
         """
 
         required_keys = ['filename', 'mediaMetadata', 'baseUrl']
-        assert all(key in required_keys for key in list(dictionary.keys())), \
+        assert all(key in list(dictionary.keys()) for key in required_keys), \
             'Dictionary missing required key. GoogleMediItem.from_dict() ' \
             'requires keys: {}'.format(required_keys)
 
@@ -48,7 +48,7 @@ class GoogleMediaItem:
 
         self.metadata = dictionary['mediaMetadata'][self.type]
 
-    def download_to_dir(self, directory):
+    def download(self, directory):
         """
         Downloads media item to given directory (with metadata, except GPS).
         Info about download URL:

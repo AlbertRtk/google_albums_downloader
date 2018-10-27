@@ -27,7 +27,7 @@ class GoogleAlbum:
         :return: None
         """
         required_keys = ['id', 'title', 'mediaItemsCount', 'productUrl']
-        assert all(key in required_keys for key in list(dictionary.keys())), \
+        assert all(key in list(dictionary.keys()) for key in required_keys), \
             'Dictionary missing required key. GoogleAlbum.from_dict() ' \
             'requires keys: {}'.format(required_keys)
 
@@ -72,7 +72,7 @@ class GoogleAlbum:
             for item in media_items:
                 counter += 1
                 media.from_dict(item)
-                name = media.download_to_dir(album_dir)
+                name = media.download(album_dir)
                 print('({}/{}) downloaded: {}'.
                       format(counter, self.items_count, name))
 

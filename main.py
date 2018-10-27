@@ -48,7 +48,7 @@ def main():
     # Getting albums
     page_size = 10  # max 20
     fields = 'nextPageToken,albums(id,title,mediaItemsCount,productUrl)'
-    albums = service.albums().list(pageSize=page_size, fields=fields).execute()
+    albums = service.albums().search(pageSize=10, fields=fields).execute()
     albums = albums['albums']
 
     g_album = GoogleAlbum()
@@ -66,15 +66,41 @@ def main():
             g_album.download(service, directory=LIBRARY_PATH)
 
 
+def get_albums(page_token=None):
+    """
+
+    :param page_token:
+    :return:
+    """
+    fields = 'nextPageToken,albums'
+    request = service.albums().list(pageToken=page_token, fields=fields)
+    response = request.execute()
+
+    try:
+        albums = response['albums']
+    except KeyError:
+        return {}
+
+    if 'nextPageToken' in response:
+        next_page_token = response['nextPageToken']
+        next_page = get_albums(page_token=next_page_token)
+        albums.append(next_page)
+
+    return albums
+
+
 def test():
-    fields = 'nextPageToken,albums(id,title,mediaItemsCount,productUrl)'
-    albums = service.albums().list(pageSize=2, fields=fields).execute()
-    pprint(albums)
+    albums = get_albums()
+    pprint(albums[1])
+
+    for k in ['id', 'title', 'mediaItemsCount', 'productUrl']:
+        print(albums[1][k])
 
     album = GoogleAlbum()
-    album.from_dict(albums['albums'][1])
+    album.from_dict(albums[1])
+    print(album)
 
 
 if __name__ == '__main__':
-    # test()
-    main()
+    test()
+    # main()
