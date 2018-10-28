@@ -3,28 +3,27 @@ AR, 2018-10-25
 Authorization class and get_credentials method for Google APIs
 """
 
+# general imports
+
 from oauth2client import file, client, tools
 import httplib2
 import os
 
-from userdir import check_user_dir
+# local imports
+from userdir import user_dir
 
 
-# Class with data for authorization of connection between client and service
-class Authorization:
-    def __init__(self, app_name, scopes, client_secret_file):
-        self.app_name = app_name
+# Class with data for authorization of access
+class Auth:
+    def __init__(self, scopes, client_secret_file):
         self.scopes = scopes
         self.client_secret_file = client_secret_file
-
-    def __str__(self):
-        return 'Authorization class for {}'.format(self.app_name)
 
     # Method gets user credential from storage - JSON file
     # If credential are not in storage or are invalid, gets new credentials
     # If stored credential are expired, refreshes them
     # Return credentials
-    @check_user_dir
+    @user_dir
     def get_credentials(self, **kwargs):
         creds_file = os.path.join(kwargs['user_dir'], 'credentials.json')
 

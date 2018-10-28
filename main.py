@@ -18,7 +18,7 @@ from googleapiclient.discovery import build
 
 # local imports
 from locallibrary import LocalLibrary
-from authorization import Authorization
+from auth import Auth
 from googlealbum import GoogleAlbum, get_albums
 
 
@@ -33,7 +33,7 @@ API_SERVICE_NAME = 'photoslibrary'
 API_VERSION = 'v1'
 
 # Getting authorization and building service
-authorization = Authorization(APP_NAME, SCOPES, CLIENT_SECRETS_FILE)
+authorization = Auth(SCOPES, CLIENT_SECRETS_FILE)
 credentials = authorization.get_credentials()
 service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 

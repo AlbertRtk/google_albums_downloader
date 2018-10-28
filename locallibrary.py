@@ -7,7 +7,7 @@ import os
 import json
 
 # local imports
-from userdir import check_user_dir
+from userdir import user_dir
 
 
 # TODO: commenting
@@ -33,7 +33,7 @@ class LocalLibrary:
     def get_path(self):
         return self.path
 
-    @check_user_dir
+    @user_dir
     def load(self, **kwargs):
         json_file = os.path.join(kwargs['user_dir'], 'local_library.json')
         try:
@@ -45,7 +45,7 @@ class LocalLibrary:
         except FileNotFoundError:
             return False
 
-    @check_user_dir
+    @user_dir
     def store(self, **kwargs):
         ids = [i for i in self.album_ids]
         library = {'path': self.path, 'album_ids': ids}
