@@ -20,7 +20,7 @@ from googleapiclient.discovery import build
 # local imports
 from locallibrary import LocalLibrary
 from authorization import Authorization
-from googlealbum import GoogleAlbum
+from googlealbum import GoogleAlbum, get_albums
 
 
 APP_NAME = 'Albums downloader'
@@ -54,68 +54,40 @@ service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 def main():
     # Getting albums
-    albums = get_albums(album_fields='(id,title,mediaItemsCount,productUrl)')
+    fields = '(id,title,mediaItemsCount,productUrl)'
+    albums = get_albums(service, album_fields=fields)
 
     # Titles of albums to download start with #
     pattern = re.compile('^#\s*')
 
-    google_album = GoogleAlbum()
-
     for album in albums:
-        google_album.from_dict(album)
-
         # If title starts with # - changing title and downloading
-        if bool(re.match(pattern, google_album.title)):
-            print(google_album, end='\n'*2)
-            library.add(google_album.id)
-            google_album.set_title(re.sub(pattern, '', google_album.title))
-            google_album.download(service, directory=LIBRARY_PATH,
-                                  media_fields='(filename,baseUrl)')
+        if bool(re.match(pattern, album.title)):
+            print(album, end='\n'*2)
+            library.add(album.id)
+            album.set_title(re.sub(pattern, '', album.title))
+            album.download(service, directory=LIBRARY_PATH,
+                           media_fields='(filename,baseUrl)')
 
     library.store()
     print('\nUpdated {}'.format(library))
-    # ctypes.windll.kernel32.SetFileAttributesW(file, 2)  # hidden
-
-
-# TODO: move to googlealbum.py
-def get_albums(page_token=None, album_fields=''):
-    """
-    Function gets list of all albums (dict) from user photo library.
-    Recursion as long as in response is next page token.
-
-    :param album_fields: string - listing keys in dict describing albums,
-    starts and ends with brackets (), comma-separated, no whitespace characters,
-    eg. '(id,title,mediaItemsCount,productUrl)', default empty string gets all
-    possible fields
-    :param page_token: string - next page token, for 1st call None
-    :return:
-    """
-
-    # Setting fields and request
-    fields = 'nextPageToken,albums{}'.format(album_fields)
-    request = service.albums().list(pageToken=page_token, fields=fields)
-    response = request.execute()
-
-    # Getting albums list from response - if exists, else albums is empty list
-    albums = response['albums'] if 'albums' in response else []
-
-    # If in response is 'nextPageToken' - recursion and merging return to albums
-    if 'nextPageToken' in response:
-        albums += get_albums(response['nextPageToken'], album_fields)
-
-    return albums
 
 
 def test():
-    print(library)
-    album = GoogleAlbum()
-    library.add(album)
-    library.add(album)
-    library.set_path('C:\\Users\\Albert\\Albums downloader')
-
-    print(library.get_ids())
-
-    print(library)
+    # Getting albums
+    fields = '(id,title,mediaItemsCount,productUrl)'
+    albums = get_albums(service, album_fields=fields)
+    for album in albums:
+        print(album)
+    # print(library)
+    # album = GoogleAlbum()
+    # library.add(album)
+    # library.add(album)
+    # library.set_path('C:\\Users\\Albert\\Albums downloader')
+    #
+    # print(library.get_ids())
+    #
+    # print(library)
 
 
 if __name__ == '__main__':

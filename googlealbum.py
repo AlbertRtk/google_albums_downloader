@@ -84,3 +84,36 @@ class GoogleAlbum:
         if 'nextPageToken' in response:
             self.download(service, directory, response['nextPageToken'],
                           media_fields, counter)
+
+
+def get_albums(service, page_token=None, album_fields=''):
+    """
+    Function gets list of all GoogleAlbums from user photo library.
+    Recursion as long as in response is next page token.
+
+    :param service: service
+    :param page_token: string - next page token, for 1st call None
+    :param album_fields: string - listing keys in dict describing albums,
+    starts and ends with brackets (), comma-separated, no whitespace characters,
+    eg. '(id,title,mediaItemsCount,productUrl)', default empty string gets all
+    possible fields
+    :return:
+    """
+
+    # Setting fields and request
+    fields = 'nextPageToken,albums{}'.format(album_fields)
+    request = service.albums().list(pageToken=page_token, fields=fields)
+    response = request.execute()
+
+    # Getting albums list from response - if exists, else albums is empty list
+    albums_list = response['albums'] if 'albums' in response else []
+    albums = []
+    for album in albums_list:
+        albums.append(GoogleAlbum())
+        albums[-1].from_dict(album)
+
+    # If in response is 'nextPageToken' - recursion and merging return to albums
+    if 'nextPageToken' in response:
+        albums += get_albums(service, response['nextPageToken'], album_fields)
+
+    return albums
