@@ -36,6 +36,11 @@ class GoogleAlbum:
         self.items_count = int(dictionary['mediaItemsCount'])
         self.url = dictionary['productUrl']
 
+    def from_id(self, service, album_id):
+        request = service.albums().get(albumId=album_id)
+        response = request.execute()
+        self.from_dict(response)
+
     def to_dict(self):
         return {'id': self.id, 'title': self.title,
                 'mediaItemsCount': self.items_count, 'productUrl': self.url}

@@ -12,7 +12,6 @@ https://developers.google.com/photos/library/guides/overview
 # general imports
 import os
 from pprint import pprint
-import re
 
 # imports from google-api-python-client library
 from googleapiclient.discovery import build
@@ -20,31 +19,22 @@ from googleapiclient.discovery import build
 # local imports
 from locallibrary import LocalLibrary
 from authorization import Authorization
-from googlealbum import get_albums
+from googlealbum import GoogleAlbum, get_albums
 
 
+# Settings
 APP_NAME = 'Albums downloader'
-
-# Name of a file that contains the OAuth 2.0 information for this application:
+library = LocalLibrary(APP_NAME)
+# File with the OAuth 2.0 information:
 CLIENT_SECRETS_FILE = "client_secret.json"
-
 # This access scope grants read-only access:
 SCOPES = ['https://www.googleapis.com/auth/photoslibrary.readonly']
 API_SERVICE_NAME = 'photoslibrary'
 API_VERSION = 'v1'
 
-
-LIBRARY_PATH = os.path.join(os.path.expanduser('~'), APP_NAME)
-DOWNLOADED_ALBUMS = 'downloaded_albums.json'
-
-# Settings
-library = LocalLibrary(APP_NAME)
-
-# Getting authorization
+# Getting authorization and building service
 authorization = Authorization(APP_NAME, SCOPES, CLIENT_SECRETS_FILE)
 credentials = authorization.get_credentials()
-print(credentials)
-# Building service
 service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 
@@ -54,64 +44,31 @@ service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 # TODO: user interface - console
 
 def main():
-    library.load()
-    print('\nStarting {}'.format(library))
+    # Loading library info from JSON or setting library (1st run)
+    loaded = library.load()
+    if loaded is False:
+        print('Default path to local library: {}'.format(library.get_path()))
+        path = input('Give absolute path to local library '
+                     '[leave empty to keep default]:\n')
+        if os.path.isabs(path):
+            print('Library path: {}'.format(library.set_path(path)))
+        else:
+            print('Keeping default path.')
+        library.store()
+    else:
+        print(library)
 
-    # Getting albums
-    fields = '(id,title,mediaItemsCount,productUrl)'
-    albums = get_albums(service, album_fields=fields)
-
-    # Titles of albums to download start with #
-    pattern = re.compile('^#\s*')
-
-    for album in albums:
-        # If title starts with # - changing title and downloading
-        if bool(re.match(pattern, album.title)):
-            print(album, end='\n'*2)
-            library.add(album.id)
-            album.set_title(re.sub(pattern, '', album.title))
-            # album.download(service, directory=LIBRARY_PATH)
+    # Updating albums in local library
+    print('\n*** Updating local library ***')
+    album = GoogleAlbum()
+    for i in library.get_ids():
+        album.from_id(service, album_id=i)
+        print(album)
+        album.download(service, library.get_path())
 
     library.store()
     print('\nUpdated {}'.format(library))
 
 
-def test():
-    library.load()
-    print('\nStarting {}'.format(library))
-    print(library.get_path())
-    print(library.get_ids())
-
-    # library.store()
-    print('\nUpdated {}'.format(library))
-
-    # print(library)
-    # album = GoogleAlbum()
-    # library.add(album)
-    # library.add(album)
-    # library.set_path('C:\\Users\\Albert\\Albums downloader')
-    #
-    # print(library.get_ids())
-    #
-    # print(library)
-
-
 if __name__ == '__main__':
-    # test()
     main()
-
-# end of file
-
-"""
-    # Titles of albums to download start with #
-    pattern = re.compile('^#\s*')
-
-    for album in albums:
-        # If title starts with # - changing title and downloading
-        if bool(re.match(pattern, album.title)):
-            print(album, end='\n'*2)
-            library.add(album.id)
-            album.set_title(re.sub(pattern, '', album.title))
-            album.download(service, directory=LIBRARY_PATH,
-                           media_fields='(id,filename,baseUrl)')
-"""

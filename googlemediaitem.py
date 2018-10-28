@@ -4,12 +4,13 @@ from urllib.request import urlretrieve
 
 
 class GoogleMediaItem:
-    def __init__(self, name=None, base_url=None):
+    def __init__(self, name=None, item_id=None, base_url=None):
         self.name = name
+        self.id = item_id
         self.base_url = base_url
 
     def __str__(self):
-        return 'Media item {}: {}=w{}-h{}'.format(self.name, self.base_url)
+        return 'Media item {}: {}'.format(self.name, self.base_url)
 
     def from_dict(self, dictionary):
         """
@@ -21,12 +22,13 @@ class GoogleMediaItem:
         :return: None
         """
 
-        required_keys = ['filename', 'baseUrl']
+        required_keys = ['filename', 'id', 'baseUrl']
         assert all(key in list(dictionary.keys()) for key in required_keys), \
             'Dictionary missing required key. GoogleMediaItem.from_dict() ' \
             'requires keys: {}'.format(required_keys)
 
         self.name = dictionary['filename']
+        self.id = dictionary['id']
         self.base_url = dictionary['baseUrl']
 
     def download(self, directory):

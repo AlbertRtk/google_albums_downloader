@@ -1,6 +1,12 @@
+"""
+
+"""
+
+# general imports
 import os
 import json
 
+# local imports
 from userdir import check_user_dir
 
 
@@ -35,8 +41,9 @@ class LocalLibrary:
                 storage = json.load(f)
             self.path = storage['path']
             [self.album_ids.add(i) for i in storage['album_ids']]
+            return True
         except FileNotFoundError:
-            pass
+            return False
 
     @check_user_dir
     def store(self, **kwargs):
