@@ -7,6 +7,8 @@ from oauth2client import file, client, tools
 import httplib2
 import os
 
+from userdir import check_user_dir
+
 
 # Class with data for authorization of connection between client and service
 class Authorization:
@@ -22,13 +24,9 @@ class Authorization:
     # If credential are not in storage or are invalid, gets new credentials
     # If stored credential are expired, refreshes them
     # Return credentials
-    def get_credentials(self):
-        # Setting directory and JSON file with user's credentials
-        cwd = os.getcwd()
-        user_dir = os.path.join(cwd, 'user')
-        if not os.path.exists(user_dir):
-            os.makedirs(user_dir)
-        creds_file = os.path.join(user_dir, 'credentials.json')
+    @check_user_dir
+    def get_credentials(self, **kwargs):
+        creds_file = os.path.join(kwargs['user_dir'], 'credentials.json')
 
         # Getting credentials from Storage
         store = file.Storage(creds_file)

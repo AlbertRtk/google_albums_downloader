@@ -20,7 +20,7 @@ from googleapiclient.discovery import build
 # local imports
 from locallibrary import LocalLibrary
 from authorization import Authorization
-from googlealbum import GoogleAlbum, get_albums
+from googlealbum import get_albums
 
 
 APP_NAME = 'Albums downloader'
@@ -43,6 +43,7 @@ library = LocalLibrary(APP_NAME)
 # Getting authorization
 authorization = Authorization(APP_NAME, SCOPES, CLIENT_SECRETS_FILE)
 credentials = authorization.get_credentials()
+print(credentials)
 # Building service
 service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
@@ -53,6 +54,9 @@ service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 # TODO: user interface - console
 
 def main():
+    library.load()
+    print('\nStarting {}'.format(library))
+
     # Getting albums
     fields = '(id,title,mediaItemsCount,productUrl)'
     albums = get_albums(service, album_fields=fields)
@@ -66,19 +70,21 @@ def main():
             print(album, end='\n'*2)
             library.add(album.id)
             album.set_title(re.sub(pattern, '', album.title))
-            album.download(service, directory=LIBRARY_PATH,
-                           media_fields='(filename,baseUrl)')
+            # album.download(service, directory=LIBRARY_PATH)
 
     library.store()
     print('\nUpdated {}'.format(library))
 
 
 def test():
-    # Getting albums
-    fields = '(id,title,mediaItemsCount,productUrl)'
-    albums = get_albums(service, album_fields=fields)
-    for album in albums:
-        print(album)
+    library.load()
+    print('\nStarting {}'.format(library))
+    print(library.get_path())
+    print(library.get_ids())
+
+    # library.store()
+    print('\nUpdated {}'.format(library))
+
     # print(library)
     # album = GoogleAlbum()
     # library.add(album)
@@ -93,3 +99,19 @@ def test():
 if __name__ == '__main__':
     # test()
     main()
+
+# end of file
+
+"""
+    # Titles of albums to download start with #
+    pattern = re.compile('^#\s*')
+
+    for album in albums:
+        # If title starts with # - changing title and downloading
+        if bool(re.match(pattern, album.title)):
+            print(album, end='\n'*2)
+            library.add(album.id)
+            album.set_title(re.sub(pattern, '', album.title))
+            album.download(service, directory=LIBRARY_PATH,
+                           media_fields='(id,filename,baseUrl)')
+"""

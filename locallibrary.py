@@ -1,5 +1,7 @@
-import os.path
+import os
 import json
+
+from userdir import check_user_dir
 
 
 # TODO: commenting
@@ -25,20 +27,23 @@ class LocalLibrary:
     def get_path(self):
         return self.path
 
-    # TODO
-    def load(self):
-        pass
+    @check_user_dir
+    def load(self, **kwargs):
+        json_file = os.path.join(kwargs['user_dir'], 'local_library.json')
+        try:
+            with open(json_file) as f:
+                storage = json.load(f)
+            self.path = storage['path']
+            [self.album_ids.add(i) for i in storage['album_ids']]
+        except FileNotFoundError:
+            pass
 
-    def store(self):
-        cwd = os.getcwd()
-        user_dir = os.path.join(cwd, 'user')
-        if not os.path.exists(user_dir):
-            os.makedirs(user_dir)
-
+    @check_user_dir
+    def store(self, **kwargs):
         ids = [i for i in self.album_ids]
         library = {'path': self.path, 'album_ids': ids}
-
-        with open(os.path.join(user_dir, 'local_library.json'), 'w') as f:
+        json_file = os.path.join(kwargs['user_dir'], 'local_library.json')
+        with open(json_file, 'w') as f:
             json.dump(library, f)
 
     def set_path(self, path):

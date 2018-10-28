@@ -40,8 +40,8 @@ class GoogleAlbum:
         return {'id': self.id, 'title': self.title,
                 'mediaItemsCount': self.items_count, 'productUrl': self.url}
 
-    def download(self, service, directory, page_token=None, media_fields='',
-                 counter=0):
+    def download(self, service, directory, page_token=None,
+                 media_fields='(id,filename,baseUrl)', counter=0):
         """
         Method downloads whole album from Google Photos to directory.
         Calls method GoogleMediaItem.download_to_dir() to download each media
