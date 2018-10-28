@@ -67,7 +67,7 @@ def main():
         album.download(service, library.get_path())
 
     library.store()
-    print('\nUpdated {}'.format(library))
+    print('\nUpdated {}\n'.format(library))
 
 
 if __name__ == '__main__':
