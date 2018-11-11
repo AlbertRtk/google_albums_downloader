@@ -30,7 +30,6 @@ class Auth:
         # Getting credentials from Storage
         store = file.Storage(creds_file)
         creds = store.get()
-        # print(store == creds.store)  # just a test
 
         # Validating or refreshing credentials, if necessary
         if creds is None or creds.invalid:

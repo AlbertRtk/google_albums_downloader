@@ -19,17 +19,17 @@ class LocalLibrary:
     def __str__(self):
         return 'Local library:\n' \
                '- library directory: {}\n' \
-               '- downloaded albums: {}'\
+               '- tracked albums: {}'\
                .format(self.path, len(self.album_ids))
 
     def add(self, album_id):
         if not isinstance(album_id, str):
-            raise TypeError('add() takes \str\' object as argument')
+            raise TypeError('add() takes \'str\' object as argument')
         self.album_ids.add(album_id)
 
     def remove(self, album_id):
         if not isinstance(album_id, str):
-            raise TypeError('add() takes \str\' object as argument')
+            raise TypeError('add() takes \'str\' object as argument')
         try:
             self.album_ids.remove(album_id)
         except KeyError:

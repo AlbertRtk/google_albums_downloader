@@ -13,7 +13,7 @@ class GoogleAlbum:
         self.url = url
 
     def __str__(self):
-        return 'Google Photos Album "{}":\n{}'.format(self.title, self.url)
+        return 'Google Photos Album "{}".\nURL: {}'.format(self.title, self.url)
 
     def set_title(self, title):
         self.title = title
