@@ -91,7 +91,8 @@ class GoogleAlbum:
                           media_fields, counter)
 
 
-def get_albums(service, page_token=None, album_fields=''):
+def get_albums(service, page_token=None,
+               album_fields='(id,title,mediaItemsCount,productUrl)'):
     """
     Function gets list of all GoogleAlbums from user photo library.
     Recursion as long as in response is next page token.

@@ -27,6 +27,14 @@ class LocalLibrary:
             raise TypeError('add() takes \str\' object as argument')
         self.album_ids.add(album_id)
 
+    def remove(self, album_id):
+        if not isinstance(album_id, str):
+            raise TypeError('add() takes \str\' object as argument')
+        try:
+            self.album_ids.remove(album_id)
+        except KeyError:
+            pass
+
     def get_ids(self):
         return self.album_ids
 
@@ -36,14 +44,12 @@ class LocalLibrary:
     @user_dir
     def load(self, **kwargs):
         json_file = os.path.join(kwargs['user_dir'], 'local_library.json')
-        try:
+        if os.path.exists(json_file):
             with open(json_file) as f:
                 storage = json.load(f)
             self.path = storage['path']
             [self.album_ids.add(i) for i in storage['album_ids']]
-            return True
-        except FileNotFoundError:
-            return False
+            return self
 
     @user_dir
     def store(self, **kwargs):
