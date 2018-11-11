@@ -1,9 +1,9 @@
 """
 AR, 2018-10-25
 
-Program "Get Photos"  - downloads media items (photos, videos) from an album
-                        in Google Photos using Google Photos APIs and
-                        google-api-phyton-client
+Program "Albums Downloader"  - downloads media items (photos, videos) from an
+                               album in Google Photos using Google Photos APIs
+                               and google-api-phyton-client
 
 For help with APIs check:
 https://developers.google.com/photos/library/guides/overview
