@@ -1,7 +1,7 @@
-'''
+"""
 AR, 2018-10-25
 Google Photos APIs with REST using request
-'''
+"""
 
 import requests
 

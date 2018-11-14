@@ -1,3 +1,8 @@
+"""
+AR, 2018-11
+Class GoogleMediaItem - stores information about media item from Google Photos
+"""
+
 # general imports
 import os
 from urllib.request import urlretrieve

@@ -37,9 +37,6 @@ credentials = authorization.get_credentials()
 service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 
-# TODO: refreshing album if its items changed
-# TODO: option for refreshing downloaded photo
-
 def main():
     os.system('cls')
     # Loading library info from JSON or setting library (1st run)
@@ -50,6 +47,7 @@ def main():
         print(library)
 
     while True:
+        # Printing menu and reading choice of action
         print('\n[A] add      \t [R] remove   \t [L] list     \t [U] update   '
               '\n[S] settings \t [H] help     \t [Q] quit    ')
         choice = input('What do you want to do:\n>> ').upper()
@@ -76,32 +74,51 @@ def main():
         else:
             print('Unknown command. Try again or choose H to get help.')
 
+        # Saving library setting after each action
         library.store()
 
 
 def manage_library(action):
+    """
+    Adding or removing Google Album to/from local library settings.
+    Removes only ID from LocalLibrary instance, do NOT remove file from local
+    library directory
+
+    :param action: str, 'add' or 'remove'
+    :return: None
+    """
     albums = tracked_albums()
 
+    # Setting function to call and message to print
     if action == 'add':
         func = LocalLibrary.add
         prt = action + ' to'
-    else:
+    elif action == 'remove':
         func = LocalLibrary.remove
         prt = action + ' from'
+    else:
+        return None
 
     ids = input('\nType ID numbers of albums you want to {} download list\n'
                 '(comma separated, leave empty to cancel):\n>> '.format(prt))
     if ids is not '':
         ids = ids.split(',')
         for i in ids:
+            # Handling exception - user gives not int or not a number...
             try:
-                if int(i) > 0:
+                if int(i) > 0:  # need to be here! list accepts negative indexes
                     func(library, albums[int(i)-1].id)
             except (ValueError, IndexError):
                 pass
 
 
 def set_library():
+    """
+    Sets new path of local library. Does NOT transfer library content (files)
+    to new directory!
+
+    :return: None
+    """
     print('Path to local library: {}'.format(library.get_path()))
     path = input('Give new absolute path to local library '
                  '[leave empty to keep current]:\n>> ')
@@ -113,6 +130,11 @@ def set_library():
 
 
 def show_help():
+    """
+    Prints help
+
+    :return: None
+    """
     print('*** Albums Downloader *** AR, 2018 *** \n'
           'Download photos from albums in your Google Photos Library. \n\n'
           'Detailed description of commands: \n'
@@ -126,6 +148,12 @@ def show_help():
 
 
 def tracked_albums():
+    """
+    Prints list of all albums in Google Photos and marks with [X] those which
+    are tracked (to download)
+
+    :return: list of albums
+    """
     print('Your Google Photos Albums ([X] = tracked):')
     albums = get_albums(service)
     for i, a in enumerate(albums):
@@ -135,8 +163,15 @@ def tracked_albums():
 
 
 def update_library():
+    """
+    Updates local library - downloads ALL tracked albums to local library.
+    Downloads even photos which are already downloaded - replaces them
+
+    :return: None
+    """
     print('*** Updating local library ***')
     album = GoogleAlbum()
+    # Downloading albums by ID (IDs from set stored in LocalLibrary instance)
     for i in library.get_ids():
         album.from_id(service, album_id=i)
         print('\n{}'.format(album))

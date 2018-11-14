@@ -1,3 +1,9 @@
+"""
+AR, 2018-10
+Class GoogleAlbum - stores information about Google Albums
+and methods used get and download albums
+"""
+
 # general imports
 import os
 
