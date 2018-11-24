@@ -5,4 +5,4 @@ user
 test.py
 google_photos_api_manager.py
 
-client_secret.json
+*.json
