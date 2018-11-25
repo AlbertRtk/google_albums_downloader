@@ -6,7 +6,7 @@ Downloads photos from albums in your Google Photos Library.
 * List your albums from Google Photos
 * Select album(s) to be tracked
 * Download/update tracked album(s) to local library on your hard drive
-* Always ALL photos from the album(s) are downloaded (photos, which has been downloaded earlier, will be overwritten)
+* ALL photos from the album(s) are always downloaded (photos, which has been downloaded earlier, will be overwritten)
 
 ### How to run it?
 * In project directory (v1p0), you need to place client_secret.json file from [Google API Console](https://console.developers.google.com/apis/)
