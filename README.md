@@ -1,11 +1,19 @@
-## Albums Downloader
+# Albums Downloader
 Downloads photos from albums in your Google Photos Library.
 
+## Verion 1.0 (directory v1p1)
 ### What you can do?
 * List your albums from Google Photos
-* Select albums to be tracked
-* Download/update tracked albums to local library on your hard drive
+* Select album(s) to be tracked
+* Download/update tracked album(s) to local library on your hard drive
+* Always ALL photos from the album(s) are downloaded (photos, which has been downloaded earlier, will be overwritten)
 
 ### How to run it?
-* You need client_secret.json file in project directory (from Google API Console)
-* If you have client_secret.json, run run.bat file
+* In project directory (v1p0), you need to place client_secret.json file from [Google API Console](https://console.developers.google.com/apis/)
+* You also need virtual environment for the project (venv directory)
+* If you have client_secret.json and virtual environment, run run.bat file
+
+### About client secret
+* Create new project in [Google API Console](https://console.developers.google.com/apis/)
+* Enable Photos Library API
+* Create and download credentials (OAuth client ID). Save them as client_secret.json
