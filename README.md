@@ -1,7 +1,7 @@
 # Albums Downloader
 Downloads photos from albums in your Google Photos Library.
 
-## Verion 1.0 (directory v1p1)
+## Verion 1.0
 ### What you can do?
 * List your albums from Google Photos
 * Select album(s) to be tracked
