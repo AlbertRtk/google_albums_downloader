@@ -181,7 +181,8 @@ def update_library():
     for i in library.get_ids():
         album.from_id(service, album_id=i)
         print('\n{}'.format(album))
-        album.download(service, library.get_path())
+        item_ids = album.download(service, library.get_path(), [])
+        print(item_ids)
 
 
 if __name__ == '__main__':

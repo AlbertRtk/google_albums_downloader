@@ -51,11 +51,11 @@ class GoogleAlbum:
         return {'id': self.id, 'title': self.title,
                 'mediaItemsCount': self.items_count, 'productUrl': self.url}
 
-    def download(self, service, directory, page_token=None,
+    def download(self, service, directory, exclude=[], page_token=None,
                  media_fields='(id,filename,baseUrl)', counter=0):
         """
         Method downloads whole album from Google Photos to directory.
-        Calls method GoogleMediaItem.download_to_dir() to download each media
+        Calls method GoogleMediaItem.download() to download each media
         item in the album. Recursion as long as in response is next page token.
 
         :param service: googleapiclient flow object
@@ -66,7 +66,7 @@ class GoogleAlbum:
         whitespace characters, eg. '(filename,mediaMetadata,baseUrl)', default
         empty string gets all possible fields
         :param counter: int - just a simple counter to count downloaded media
-        :return: None
+        :return: downloaded_ids, list with ids of downloaded items
         """
 
         # Setting destination directory for media files - named as album
@@ -84,17 +84,22 @@ class GoogleAlbum:
         items = response['mediaItems'] if 'mediaItems' in response else []
 
         media = GoogleMediaItem()
-        # Downloading all media from the page
+        downloaded_ids = []
+        # Downloading media from the page, excluding items from excude list
         for item in items:
-            counter += 1
-            media.from_dict(item)
-            name = media.download(album_dir)
-            print('({}/{}) Downloaded: {}'.
-                  format(counter, self.items_count, name))
+            if item['id'] not in exclude:
+                counter += 1
+                downloaded_ids.append(item['id'])
+                media.from_dict(item)
+                name = media.download(album_dir)
+                print('({}/{}) Downloaded: {}'.
+                      format(counter, self.items_count, name))
 
         if 'nextPageToken' in response:
-            self.download(service, directory, response['nextPageToken'],
+            self.download(service, directory, exclude, response['nextPageToken'],
                           media_fields, counter)
+
+        return downloaded_ids
 
 
 def get_albums(service, page_token=None,
