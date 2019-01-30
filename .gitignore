@@ -1,8 +1,8 @@
-.idea
-__pycache__
-user
+.idea 
+__pycache__ 
+user 
 
-test.py
-google_photos_api_manager.py
+test.py 
+google_photos_api_manager.py 
 
-*.json
+*.json 

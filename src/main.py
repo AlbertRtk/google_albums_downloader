@@ -39,6 +39,18 @@ service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
 
 def main():
     os.system('cls')
+
+    # Menu options
+    options = {
+               'A': library_add,
+               'R': library_remove,
+               'L': tracked_albums,
+               'U': update_library,
+               'S': set_library,
+               'H': show_help,
+               'Q': quit,
+               }
+
     # Loading library info from JSON or setting library (1st run)
     loaded = library.load()
     if loaded is None:
@@ -53,25 +65,10 @@ def main():
         choice = input('What do you want to do:\n>> ').upper()
         os.system('cls')
 
-        if choice == 'A':
-            manage_library('add')
-            os.system('cls')
-            tracked_albums()
-        elif choice == 'R':
-            manage_library('remove')
-            os.system('cls')
-            tracked_albums()
-        elif choice == 'L':
-            tracked_albums()
-        elif choice == 'U':
-            update_library()
-        elif choice == 'S':
-            set_library()
-        elif choice == 'H':
-            show_help()
-        elif choice == 'Q':
-            break
-        else:
+        # Calling chosen action
+        try:
+            options[choice]()
+        except KeyError:
             print('Unknown command. Try again or choose H to get help.')
 
         # Saving library setting after each action
@@ -112,12 +109,28 @@ def manage_library(action):
                 pass
 
 
+def library_add():
+    """
+    Adds album to local library.
+    """
+    manage_library('add')
+    os.system('cls')
+    tracked_albums()
+
+
+def library_remove():
+    """
+    Removes album from local library
+    """
+    manage_library('remove')
+    os.system('cls')
+    tracked_albums()
+
+
 def set_library():
     """
     Sets new path of local library. Does NOT transfer library content (files)
     to new directory!
-
-    :return: None
     """
     print('Path to local library: {}'.format(library.get_path()))
     path = input('Give new absolute path to local library '
@@ -132,8 +145,6 @@ def set_library():
 def show_help():
     """
     Prints help
-
-    :return: None
     """
     print('*** Albums Downloader *** AR, 2018 *** \n'
           'Download photos from albums in your Google Photos Library. \n\n'
@@ -151,23 +162,18 @@ def tracked_albums():
     """
     Prints list of all albums in Google Photos and marks with [X] those which
     are tracked (to download)
-
-    :return: list of albums
     """
     print('Your Google Photos Albums ([X] = tracked):')
     albums = get_albums(service)
     for i, a in enumerate(albums):
         check = 'X' if a.id in library.get_ids() else ' '
         print('[{}] {}. {}'.format(check, i+1, a.title))
-    return albums
 
 
 def update_library():
     """
     Updates local library - downloads ALL tracked albums to local library.
     Downloads even photos which are already downloaded - replaces them
-
-    :return: None
     """
     print('*** Updating local library ***')
     album = GoogleAlbum()
