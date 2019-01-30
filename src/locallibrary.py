@@ -15,13 +15,13 @@ from userdir import user_dir
 class LocalLibrary:
     def __init__(self, app_name):
         self.path = os.path.join(os.path.expanduser('~'), app_name)
-        self.album_ids = set()
+        self.albums = set()
 
     def __str__(self):
         return 'Local library:\n' \
                '- library directory: {}\n' \
                '- tracked albums: {}'\
-               .format(self.path, len(self.album_ids))
+               .format(self.path, len(self.albums))
 
     def add(self, album_id):
         """
@@ -32,7 +32,7 @@ class LocalLibrary:
         """
         if not isinstance(album_id, str):
             raise TypeError('add() takes \'str\' object as argument')
-        self.album_ids.add(album_id)
+        self.albums.add(LocalAlbum(album_id))
 
     def remove(self, album_id):
         """
@@ -44,12 +44,15 @@ class LocalLibrary:
         if not isinstance(album_id, str):
             raise TypeError('add() takes \'str\' object as argument')
         try:
-            self.album_ids.remove(album_id)
+            for album in self.albums:
+                if album_id is album.get_id():
+                    self.albums.remove(album)
+                    break
         except KeyError:
             pass
 
     def get_ids(self):
-        return self.album_ids
+        return [album.get_id() for album in self.albums]
 
     def get_path(self):
         return self.path
@@ -68,7 +71,7 @@ class LocalLibrary:
             with open(json_file) as f:
                 storage = json.load(f)
             self.path = storage['path']
-            [self.album_ids.add(i) for i in storage['album_ids']]
+            [self.albums.add(LocalAlbum(i)) for i in storage['albums']]
             return self
 
     @user_dir
@@ -80,8 +83,7 @@ class LocalLibrary:
         :param kwargs: to send user directory between method and decorator
         :return: None
         """
-        ids = [i for i in self.album_ids]
-        library = {'path': self.path, 'album_ids': ids}
+        library = {'path': self.path, 'albums': self.get_ids()}
         json_file = os.path.join(kwargs['user_dir'], 'local_library.json')
         with open(json_file, 'w') as f:
             json.dump(library, f)
@@ -103,6 +105,7 @@ class LocalLibrary:
 
 class LocalAlbum:
     def __init__(self, album_id):
+        self.id = album_id
         self.item_ids = set()
 
     def add(self, item_id):
@@ -122,5 +125,8 @@ class LocalAlbum:
         except KeyError:
             pass
 
-    def get_ids(self):
+    def get_id(self):
+        return self.id
+
+    def get_item_ids(self):
         return self.item_ids
