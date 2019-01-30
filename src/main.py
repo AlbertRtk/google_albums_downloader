@@ -182,8 +182,8 @@ def update_library():
         album.from_id(service, album_id=i)
         print('\n{}'.format(album))
         item_ids = album.download(service, library.get_path(), [])
-        print(item_ids)
-
+        print(item_ids)  # TODO: send item_ids to LocalAlbum + store
+                         # get_ids --> get_album ?? 
 
 if __name__ == '__main__':
     main()

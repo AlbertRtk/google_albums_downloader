@@ -103,6 +103,7 @@ class LocalLibrary:
         return self.path
 
 
+# TODO: saving item ids to LocalAlbum
 class LocalAlbum:
     def __init__(self, album_id):
         self.id = album_id
