@@ -99,3 +99,28 @@ class LocalLibrary:
                 os.makedirs(path)
             self.path = path
         return self.path
+
+
+class LocalAlbum:
+    def __init__(self, album_id):
+        self.item_ids = set()
+
+    def add(self, item_id):
+        """
+        """
+        if not isinstance(item_id, str):
+            raise TypeError('add() takes \'str\' object as argument')
+        self.item_ids.add(item_id)
+
+    def remove(self, item_id):
+        """
+        """
+        if not isinstance(item_id, str):
+            raise TypeError('add() takes \'str\' object as argument')
+        try:
+            self.item_ids.remove(item_id)
+        except KeyError:
+            pass
+
+    def get_ids(self):
+        return self.item_ids
