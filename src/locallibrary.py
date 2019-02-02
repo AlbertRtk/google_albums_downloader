@@ -15,7 +15,7 @@ from userdir import user_dir
 class LocalLibrary:
     def __init__(self, app_name):
         self.path = os.path.join(os.path.expanduser('~'), app_name)
-        self.albums = set()
+        self.albums = dict()
 
     def __str__(self):
         return 'Local library:\n' \
@@ -25,18 +25,18 @@ class LocalLibrary:
 
     def add(self, album_id):
         """
-        Adds album ID to set of tracked albums ISs (albums to download)
+        Adds album ID as a key to dict of tracked albums (albums to download)
 
         :param album_id: ID of an album in Google Photos
         :return: None
         """
         if not isinstance(album_id, str):
             raise TypeError('add() takes \'str\' object as argument')
-        self.albums.add(LocalAlbum(album_id))
+        self.albums.update({album_id: []})
 
     def remove(self, album_id):
         """
-        Removes album ID from set of tracked albums IDs
+        Removes album ID from dict of tracked albums IDs
 
         :param album_id: ID of an album in Google Photos
         :return: None
@@ -44,15 +44,12 @@ class LocalLibrary:
         if not isinstance(album_id, str):
             raise TypeError('add() takes \'str\' object as argument')
         try:
-            for album in self.albums:
-                if album_id is album.get_id():
-                    self.albums.remove(album)
-                    break
+            self.albums.pop(album_id)
         except KeyError:
             pass
 
     def get_ids(self):
-        return [album.get_id() for album in self.albums]
+        return list(self.albums.keys())
 
     def get_path(self):
         return self.path
@@ -71,7 +68,7 @@ class LocalLibrary:
             with open(json_file) as f:
                 storage = json.load(f)
             self.path = storage['path']
-            [self.albums.add(LocalAlbum(i)) for i in storage['albums']]
+            self.albums = storage['albums']
             return self
 
     @user_dir
@@ -83,7 +80,7 @@ class LocalLibrary:
         :param kwargs: to send user directory between method and decorator
         :return: None
         """
-        library = {'path': self.path, 'albums': self.get_ids()}
+        library = {'path': self.path, 'albums': self.albums}
         json_file = os.path.join(kwargs['user_dir'], 'local_library.json')
         with open(json_file, 'w') as f:
             json.dump(library, f)
@@ -101,33 +98,3 @@ class LocalLibrary:
                 os.makedirs(path)
             self.path = path
         return self.path
-
-
-# TODO: saving item ids to LocalAlbum
-class LocalAlbum:
-    def __init__(self, album_id):
-        self.id = album_id
-        self.item_ids = set()
-
-    def add(self, item_id):
-        """
-        """
-        if not isinstance(item_id, str):
-            raise TypeError('add() takes \'str\' object as argument')
-        self.item_ids.add(item_id)
-
-    def remove(self, item_id):
-        """
-        """
-        if not isinstance(item_id, str):
-            raise TypeError('add() takes \'str\' object as argument')
-        try:
-            self.item_ids.remove(item_id)
-        except KeyError:
-            pass
-
-    def get_id(self):
-        return self.id
-
-    def get_item_ids(self):
-        return self.item_ids

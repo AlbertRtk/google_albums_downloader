@@ -162,12 +162,15 @@ def tracked_albums():
     """
     Prints list of all albums in Google Photos and marks with [X] those which
     are tracked (to download)
+
+    :return: list of albums
     """
     print('Your Google Photos Albums ([X] = tracked):')
     albums = get_albums(service)
     for i, a in enumerate(albums):
         check = 'X' if a.id in library.get_ids() else ' '
         print('[{}] {}. {}'.format(check, i+1, a.title))
+    return albums
 
 
 def update_library():
@@ -183,7 +186,7 @@ def update_library():
         print('\n{}'.format(album))
         item_ids = album.download(service, library.get_path(), [])
         print(item_ids)  # TODO: send item_ids to LocalAlbum + store
-                         # get_ids --> get_album ?? 
+                         # get_ids --> get_album ??
 
 if __name__ == '__main__':
     main()
