@@ -51,7 +51,7 @@ class GoogleAlbum:
         return {'id': self.id, 'title': self.title,
                 'mediaItemsCount': self.items_count, 'productUrl': self.url}
 
-    def download(self, service, directory, exclude=[], page_token=None,
+    def download(self, service, directory, skip=[], page_token=None,
                  media_fields='(id,filename,baseUrl)', counter=0):
         """
         Method downloads whole album from Google Photos to directory.
@@ -84,20 +84,27 @@ class GoogleAlbum:
         items = response['mediaItems'] if 'mediaItems' in response else []
 
         media = GoogleMediaItem()
-        downloaded_ids = []
-        # Downloading media from the page, excluding items from excude list
+        downloaded_ids = set()
+        # Downloading media from the page, excluding items from skip list
         for item in items:
-            if item['id'] not in exclude:
+            if item['id'] not in skip:
                 counter += 1
-                downloaded_ids.append(item['id'])
+                downloaded_ids.add(item['id'])
                 media.from_dict(item)
                 name = media.download(album_dir)
-                print('({}/{}) Downloaded: {}'.
-                      format(counter, self.items_count, name))
+                print('({}/{}) Downloaded: {}' \
+                      .format(counter, self.items_count, name))
 
         if 'nextPageToken' in response:
-            self.download(service, directory, exclude, response['nextPageToken'],
-                          media_fields, counter)
+            next_ids = self.download(
+                                     service=service,
+                                     directory=directory,
+                                     skip=skip,
+                                     page_token=response['nextPageToken'],
+                                     media_fields=media_fields,
+                                     counter=counter
+                                     )
+            downloaded_ids.update(next_ids)
 
         return downloaded_ids
 

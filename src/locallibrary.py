@@ -14,30 +14,30 @@ from userdir import user_dir
 
 class LocalLibrary:
     def __init__(self, app_name):
+        """
+        self.path: path to local library dir
+        self.albums: dict with album IDs as keys and sets of item IDs as values
+        """
         self.path = os.path.join(os.path.expanduser('~'), app_name)
         self.albums = dict()
 
     def __str__(self):
-        return 'Local library:\n' \
-               '- library directory: {}\n' \
-               '- tracked albums: {}'\
+        return 'Local library:\n- library directory: {}\n- tracked albums: {}'\
                .format(self.path, len(self.albums))
 
     def add(self, album_id):
         """
         Adds album ID as a key to dict of tracked albums (albums to download)
-
         :param album_id: ID of an album in Google Photos
         :return: None
         """
         if not isinstance(album_id, str):
             raise TypeError('add() takes \'str\' object as argument')
-        self.albums.update({album_id: []})
+        self.albums.update({album_id: set()})
 
     def remove(self, album_id):
         """
         Removes album ID from dict of tracked albums IDs
-
         :param album_id: ID of an album in Google Photos
         :return: None
         """
@@ -48,8 +48,14 @@ class LocalLibrary:
         except KeyError:
             pass
 
-    def get_ids(self):
+    def get_album_ids(self):
         return list(self.albums.keys())
+
+    def add_to_album(self, album_id, item_ids=set()):
+        self.albums[album_id].update(item_ids)
+
+    def get_album_items(self, album_id):
+        return self.albums[album_id]
 
     def get_path(self):
         return self.path
@@ -57,38 +63,41 @@ class LocalLibrary:
     @user_dir
     def load(self, **kwargs):
         """
-        Loads local library setups from JSON file: path and IDs of tracked
-        albums
-
+        Loads local library setups from JSON file: path and albums
         :param kwargs: to send user directory between method and decorator
         :return: self
         """
+        # Reading JSON file
         json_file = os.path.join(kwargs['user_dir'], 'local_library.json')
         if os.path.exists(json_file):
             with open(json_file) as f:
                 storage = json.load(f)
             self.path = storage['path']
             self.albums = storage['albums']
+            # Converting lists form JSON file to sets
+            for key in self.albums:
+                self.albums[key] = set(self.albums[key])
             return self
 
     @user_dir
     def store(self, **kwargs):
         """
-        Stores (saves) local library setups to JSON file: path and IDs of
-        tracked albums
-
+        Stores (saves) local library setups to JSON file: path and albums
         :param kwargs: to send user directory between method and decorator
         :return: None
         """
-        library = {'path': self.path, 'albums': self.albums}
+        albums = dict()
+        # Converting sets in albums dict to lists - JSON dosn't accept set
+        for key in self.albums:
+            albums[key] = list(self.albums[key])
+        # Saving to JSON file
         json_file = os.path.join(kwargs['user_dir'], 'local_library.json')
         with open(json_file, 'w') as f:
-            json.dump(library, f)
+            json.dump({'path': self.path, 'albums': albums}, f)
 
     def set_path(self, path):
         """
         Sets path to directory of local library
-
         :param path: absolute path to local library
         :return: self.path
         """

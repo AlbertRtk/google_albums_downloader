@@ -168,7 +168,7 @@ def tracked_albums():
     print('Your Google Photos Albums ([X] = tracked):')
     albums = get_albums(service)
     for i, a in enumerate(albums):
-        check = 'X' if a.id in library.get_ids() else ' '
+        check = 'X' if a.id in library.get_album_ids() else ' '
         print('[{}] {}. {}'.format(check, i+1, a.title))
     return albums
 
@@ -181,12 +181,15 @@ def update_library():
     print('*** Updating local library ***')
     album = GoogleAlbum()
     # Downloading albums by ID (IDs from set stored in LocalLibrary instance)
-    for i in library.get_ids():
+    for i in library.get_album_ids():
         album.from_id(service, album_id=i)
         print('\n{}'.format(album))
-        item_ids = album.download(service, library.get_path(), [])
-        print(item_ids)  # TODO: send item_ids to LocalAlbum + store
-                         # get_ids --> get_album ??
+        item_ids = album.download(
+                                  service=service,
+                                  directory=library.get_path(),
+                                  skip=library.get_album_items(i)
+                                  )
+        library.add_to_album(i, item_ids)
 
 if __name__ == '__main__':
     main()
