@@ -52,9 +52,15 @@ class LocalLibrary:
         return list(self.albums.keys())
 
     def add_to_album(self, album_id, item_ids=set()):
+        """
+        Adds item IDs as values to dict self.albums for key album_id
+        """
         self.albums[album_id].update(item_ids)
 
     def get_album_items(self, album_id):
+        """
+        :returns: IDs of items in given album
+        """
         return self.albums[album_id]
 
     def get_path(self):

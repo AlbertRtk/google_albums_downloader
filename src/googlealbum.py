@@ -27,7 +27,6 @@ class GoogleAlbum:
     def from_dict(self, dictionary):
         """
         Sets GoogleAlbum object attributes to values given in dictionary
-
         :param dictionary: with info about one of albums from list returned by
         Google APIs request: service.albums().list().execute()['albums']
         :return: None
@@ -57,7 +56,6 @@ class GoogleAlbum:
         Method downloads whole album from Google Photos to directory.
         Calls method GoogleMediaItem.download() to download each media
         item in the album. Recursion as long as in response is next page token.
-
         :param service: googleapiclient flow object
         :param directory: destination directory for downloaded album
         :param page_token: string - next page token, for 1st call None
@@ -114,7 +112,6 @@ def get_albums(service, page_token=None,
     """
     Function gets list of all GoogleAlbums from user photo library.
     Recursion as long as in response is next page token.
-
     :param service: service
     :param page_token: string - next page token, for 1st call None
     :param album_fields: string - listing keys in dict describing albums,

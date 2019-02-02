@@ -80,7 +80,6 @@ def manage_library(action):
     Adding or removing Google Album to/from local library settings.
     Removes only ID from LocalLibrary instance, do NOT remove file from local
     library directory
-
     :param action: str, 'add' or 'remove'
     :return: None
     """
@@ -162,7 +161,6 @@ def tracked_albums():
     """
     Prints list of all albums in Google Photos and marks with [X] those which
     are tracked (to download)
-
     :return: list of albums
     """
     print('Your Google Photos Albums ([X] = tracked):')
