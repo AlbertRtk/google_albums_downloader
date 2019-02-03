@@ -10,9 +10,11 @@ from initialize import initialize
 library, service = initialize()
 
 
+""" >>>>>>>>>>>>>>>>>>>>  MAIN WINDOW WIDGETS <<<<<<<<<<<<<<<<<<<< """
+
 class MyButton(tk.Button):
     def __init__(self, *args, **kwargs):
-        tk.Button.__init__(self, *args, **kwargs)
+        super().__init__(*args, **kwargs)
         self['width'] = 8
         self['height'] = 2
 
@@ -31,25 +33,21 @@ class MainWindow(tk.Frame):
 
     def create_widgets(self):
         self.report_text = tk.Text(self, width=80, height=12)
-
         self.albums_button = MyButton(
                                       self,
                                       text='Albums',
-                                      command=(lambda: None)
+                                      command=TrackedWindow
                                       )
-
         self.update_button = MyButton(
                                       self,
                                       text='Update',
                                       command=self.update_library
                                       )
-
         self.quit_button = MyButton(
                                     self,
                                     text='Quit',
                                     command=self.master.destroy
                                     )
-
         self.report_text.pack(side='top')
         self.albums_button.pack(side='left')
         self.update_button.pack(side='left')
@@ -76,6 +74,42 @@ class MainWindow(tk.Frame):
     def print_report(self, report_text):
         self.report_text.insert(tk.INSERT, report_text)
         self.report_text.update()
+
+
+""" >>>>>>>>>>>>>>>>>>>>  TRACKED WINDOW WIDGETS <<<<<<<<<<<<<<<<<<<< """
+
+class MyCheck(tk.Checkbutton):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self['onvalue'] = True
+        self['offvalue'] = False
+        self['width'] = 40
+        self['height'] = 1
+
+
+class TrackedWindow(tk.Toplevel):
+    def __init__(self, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.title = 'Tracked Google Albums'
+        self.check_vars = []
+        self.checks = []
+        self.create_list()
+        # TODO: BUTTON - save (add/remove)
+
+    def create_list(self):
+        albums = get_albums(service)
+        for i, a in enumerate(albums):
+            self.check_vars.append(tk.BooleanVar())
+            if a.id in library.get_album_ids():
+                self.check_vars[i].set(True)
+            self.checks.append(
+                               MyCheck(
+                                       self,
+                                       text=a.title,
+                                       var=self.check_vars[i]
+                                       )
+                               )
+            self.checks[i].pack()
 
 
 if __name__ == '__main__':
