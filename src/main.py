@@ -148,7 +148,6 @@ def tracked_albums():
 def update_library():
     """
     Updates local library - downloads ALL tracked albums to local library.
-    Downloads even photos which are already downloaded - replaces them
     """
     print('*** Updating local library ***')
     album = GoogleAlbum()
