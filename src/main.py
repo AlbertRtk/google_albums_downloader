@@ -1,5 +1,5 @@
 """
-AR, 2018-10-25
+Albert Ratajczak, 2018
 
 Program "Albums Downloader"  - downloads media items (photos, videos) from an
                                album in Google Photos using Google Photos APIs
@@ -12,29 +12,14 @@ https://developers.google.com/photos/library/guides/overview
 # general imports
 import os
 
-# imports from google-api-python-client library
-from googleapiclient.discovery import build
-
-# local imports
+# Local imports
 from locallibrary import LocalLibrary
-from auth import Auth
 from googlealbum import GoogleAlbum, get_albums
+from initialize import initialize
 
 
-# Settings
-APP_NAME = 'Albums downloader'
-library = LocalLibrary(APP_NAME)
-# File with the OAuth 2.0 information:
-CLIENT_SECRETS_FILE = "client_secret.json"
-# This access scope grants read-only access:
-SCOPES = ['https://www.googleapis.com/auth/photoslibrary.readonly']
-API_SERVICE_NAME = 'photoslibrary'
-API_VERSION = 'v1'
-
-# Getting authorization and building service
-authorization = Auth(SCOPES, CLIENT_SECRETS_FILE)
-credentials = authorization.get_credentials()
-service = build(API_SERVICE_NAME, API_VERSION, credentials=credentials)
+# Initialization of local library and Google APIs conection service
+library, service = initialize()
 
 
 def main():
@@ -106,24 +91,16 @@ def manage_library(action):
                     func(library, albums[int(i)-1].id)
             except (ValueError, IndexError):
                 pass
+    os.system('cls')
+    tracked_albums()
 
 
 def library_add():
-    """
-    Adds album to local library.
-    """
     manage_library('add')
-    os.system('cls')
-    tracked_albums()
 
 
 def library_remove():
-    """
-    Removes album from local library
-    """
     manage_library('remove')
-    os.system('cls')
-    tracked_albums()
 
 
 def set_library():
@@ -142,9 +119,6 @@ def set_library():
 
 
 def show_help():
-    """
-    Prints help
-    """
     print('*** Albums Downloader *** AR, 2018 *** \n'
           'Download photos from albums in your Google Photos Library. \n\n'
           'Detailed description of commands: \n'

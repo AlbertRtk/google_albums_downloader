@@ -1,5 +1,5 @@
 """
-AR1 2018-11-14
+Albert Ratajczak, 2018
 Class LocalLibrary - stores information about path to local library directory
 and IDs of tracked albums
 """

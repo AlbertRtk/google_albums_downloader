@@ -1,5 +1,5 @@
 """
-AR, 2018-10
+Albert Ratajczak, 2018
 Class GoogleAlbum - stores information about Google Albums
 and methods used get and download albums
 """
