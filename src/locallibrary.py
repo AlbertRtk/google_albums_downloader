@@ -33,7 +33,8 @@ class LocalLibrary:
         """
         if not isinstance(album_id, str):
             raise TypeError('add() takes \'str\' object as argument')
-        self.albums.update({album_id: set()})
+        if album_id not in self.albums:
+            self.albums.update({album_id: set()})
 
     def remove(self, album_id):
         """
@@ -43,10 +44,8 @@ class LocalLibrary:
         """
         if not isinstance(album_id, str):
             raise TypeError('add() takes \'str\' object as argument')
-        try:
+        if album_id in self.albums:
             self.albums.pop(album_id)
-        except KeyError:
-            pass
 
     def get_album_ids(self):
         return list(self.albums.keys())

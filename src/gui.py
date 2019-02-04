@@ -1,3 +1,7 @@
+"""
+Albert Ratajczak, 2019
+GUI for Google Albums Downloader
+"""
 import tkinter as tk
 
 # Local imports
@@ -15,7 +19,7 @@ library, service = initialize()
 class MyButton(tk.Button):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        self['width'] = 8
+        self['width'] = 12
         self['height'] = 2
 
 
@@ -28,10 +32,8 @@ class MainWindow(tk.Frame):
         self.create_widgets()
         library.load()
 
-    def __del__(self):
-        library.store()  # TODO: there is some bug!?
-
     def create_widgets(self):
+        # Creating widgets
         self.report_text = tk.Text(self, width=80, height=12)
         self.albums_button = MyButton(
                                       self,
@@ -48,6 +50,7 @@ class MainWindow(tk.Frame):
                                     text='Quit',
                                     command=self.master.destroy
                                     )
+        # Placing widgets in the window
         self.report_text.pack(side='top')
         self.albums_button.pack(side='left')
         self.update_button.pack(side='left')
@@ -69,7 +72,9 @@ class MainWindow(tk.Frame):
                                       skip=library.get_album_items(i)
                                       )
             library.add_to_album(i, item_ids)
-            self.print_report('DONE!\n')
+            self.print_report('DONE! {} item(s) downloaded\n' \
+                              .format(len(item_ids)))
+        library.store()
 
     def print_report(self, report_text):
         self.report_text.insert(tk.INSERT, report_text)
@@ -78,38 +83,64 @@ class MainWindow(tk.Frame):
 
 """ >>>>>>>>>>>>>>>>>>>>  TRACKED WINDOW WIDGETS <<<<<<<<<<<<<<<<<<<< """
 
-class MyCheck(tk.Checkbutton):
+class MyCheckbutton(tk.Checkbutton):
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self['onvalue'] = True
         self['offvalue'] = False
         self['width'] = 40
         self['height'] = 1
+        self['anchor'] = 'w'  # text aligned to left 
 
 
 class TrackedWindow(tk.Toplevel):
     def __init__(self, *args, **kwargs):
+        """
+        :selected: dict, keys - Google Album IDs, values - tk.BooleanVar
+        (True -> download, False -> ignore)
+        :checkbuttons: list with checkbuttons, linked to values of selected dict
+        """
         super().__init__(*args, **kwargs)
         self.title = 'Tracked Google Albums'
-        self.check_vars = []
-        self.checks = []
+        self.selected = dict()
+        self.checkbuttons = list()
+        # Widgets
         self.create_list()
-        # TODO: BUTTON - save (add/remove)
+        self.save_button = MyButton(
+                                    self,
+                                    text='Save',
+                                    command=self.save_selected
+                                    )
+        self.save_button.pack()
 
     def create_list(self):
+        # Gettingt albums from Google Photos
         albums = get_albums(service)
         for i, a in enumerate(albums):
-            self.check_vars.append(tk.BooleanVar())
-            if a.id in library.get_album_ids():
-                self.check_vars[i].set(True)
-            self.checks.append(
-                               MyCheck(
-                                       self,
-                                       text=a.title,
-                                       var=self.check_vars[i]
-                                       )
-                               )
-            self.checks[i].pack()
+            # Checking if album is saved in local library
+            tracked = True if a.id in library.get_album_ids() else False
+            # Setting checkbutton for each album, tracked albums selected
+            self.selected.update({a.id: tk.BooleanVar(value=tracked)})
+            self.checkbuttons.append(
+                                     MyCheckbutton(
+                                                   self,
+                                                   text=a.title,
+                                                   variable=self.selected[a.id]
+                                                   )
+                                     )
+            self.checkbuttons[i].pack()
+
+    def save_selected(self):
+        """
+        Saves selected albums to local library and closes selection window
+        """
+        for i in self.selected:
+            if self.selected[i].get() == 1:
+                library.add(i)
+            else:
+                library.remove(i)
+        library.store()
+        self.destroy()
 
 
 if __name__ == '__main__':
