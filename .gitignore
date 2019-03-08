@@ -1,8 +1,11 @@
 .idea 
 __pycache__ 
-user 
+user
+venv
 
 test.py 
 google_photos_api_manager.py 
 
 *.json 
+
+requirements.txt
