@@ -3,6 +3,8 @@ Albert Ratajczak, 2019
 GUI for Google Albums Downloader
 """
 import tkinter as tk
+import tkinter.filedialog
+import os
 
 # Local imports
 from locallibrary import LocalLibrary
@@ -45,6 +47,11 @@ class MainWindow(tk.Frame):
                                       text='Update',
                                       command=self.update_library
                                       )
+        self.library_button = MyButton(
+                                      self,
+                                      text='Library',
+                                      command=LibrarydWindow
+                                      )
         self.quit_button = MyButton(
                                     self,
                                     text='Quit',
@@ -54,6 +61,7 @@ class MainWindow(tk.Frame):
         self.report_text.pack(side='top')
         self.albums_button.pack(side='left')
         self.update_button.pack(side='left')
+        self.library_button.pack(side='left')
         self.quit_button.pack(side='left')
 
     def update_library(self):
@@ -90,7 +98,7 @@ class MyCheckbutton(tk.Checkbutton):
         self['offvalue'] = False
         self['width'] = 40
         self['height'] = 1
-        self['anchor'] = 'w'  # text aligned to left 
+        self['anchor'] = 'w'  # text aligned to left
 
 
 class TrackedWindow(tk.Toplevel):
@@ -139,6 +147,65 @@ class TrackedWindow(tk.Toplevel):
                 library.add(i)
             else:
                 library.remove(i)
+        library.store()
+        self.destroy()
+
+
+class LibrarydWindow(tk.Toplevel):
+    def __init__(self, *args, **kwargs):
+        """
+        :path_entry: tk.Entry taking new path to local library
+        """
+        super().__init__(*args, **kwargs)
+        self.title = 'Local Library'
+        # Widgets
+        self.label = tk.Label(
+                              self,
+                              text="Path: "
+                              )
+        self.path_entry = tk.Entry(
+                                   self,
+                                   width=40
+                                   )
+        self.select_button = MyButton(
+                                      self,
+                                      text='Select',
+                                      command=self.select_dir
+                                      )
+        self.save_button = MyButton(
+                                    self,
+                                    text='Save',
+                                    command=self.save_library
+                                    )
+        self.label.pack(side='left')
+        self.path_entry.pack(side='left')
+        self.path_entry.insert(0, library.get_path())  # printing path
+        self.select_button.pack(side='left')
+        self.save_button.pack(side='left')
+
+    def select_dir(self):
+        """
+        Opens directory selection window and inserts string with path to choosen
+        directory into entry line (self.path_entry)
+        """
+        path = tk.filedialog.askdirectory()
+        if path:
+            length = len(self.path_entry.get())
+            self.path_entry.delete(0, length)
+            self.path_entry.insert(0, path)
+
+    def save_library(self):
+        """
+        Save buton function.
+        Saves new path for local library and closes the window.
+        Prints report in the main window.
+        """
+        path = self.path_entry.get()
+        if os.path.isabs(path):
+            app.print_report('Library path: {}\n' \
+                             .format(library.set_path(path)))
+        else:
+            app.print_report('Wrong path. Library not changed.\n')
         library.store()
         self.destroy()
 
